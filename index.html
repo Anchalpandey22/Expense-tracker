@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ExpenseTrail — Personal Expense Tracker (Web Lab Project)</title>
+<meta name="description" content="A simple personal expense tracker built for a college web dev course. Track income, expenses, budgets and goals, all saved locally in your browser.">
+
+<!-- favicon -->
+<link rel="icon" type="image/png" href="favicon/favicon.png">
+
+<!-- Google Fonts -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+
+<!-- Font Awesome -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+<!-- Chart.js -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+
+<link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+
+<!-- loading screen, mostly here because it looks kinda nice tbh -->
+<div id="preloader">
+  <div class="loader-coin">
+    <i class="fa-solid fa-indian-rupee-sign"></i>
+  </div>
+  <p>loading your money stuff...</p>
+</div>
+
+<div id="toastBox" class="toast-box"></div>
+
+<!-- ============ SIDEBAR ============ -->
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-head">
+    <div class="brand">
+      <span class="brand-mark"><i class="fa-solid fa-wallet"></i></span>
+      <span class="brand-name">Expense<b>Trail</b></span>
+    </div>
+    <button class="icon-btn only-mobile" id="closeSidebar" aria-label="Close menu"><i class="fa-solid fa-xmark"></i></button>
+  </div>
+
+  <nav class="side-nav">
+    <a href="#dashboard" class="nav-link active" data-view="dashboard"><i class="fa-solid fa-grip"></i> Dashboard</a>
+    <a href="#transactions" class="nav-link" data-view="transactions"><i class="fa-solid fa-list-ul"></i> Transactions</a>
+    <a href="#stats" class="nav-link" data-view="stats"><i class="fa-solid fa-chart-pie"></i> Statistics</a>
+    <a href="#budget" class="nav-link" data-view="budget"><i class="fa-solid fa-piggy-bank"></i> Budget</a>
+    <a href="#goals" class="nav-link" data-view="goals"><i class="fa-solid fa-bullseye"></i> Goals</a>
+    <a href="#calendar" class="nav-link" data-view="calendar"><i class="fa-solid fa-calendar-days"></i> Calendar</a>
+    <a href="#reports" class="nav-link" data-view="reports"><i class="fa-solid fa-file-lines"></i> Reports</a>
+  </nav>
+
+  <div class="sidebar-foot">
+    <button id="darkModeToggle" class="dark-toggle">
+      <i class="fa-solid fa-moon"></i>
+      <span>Dark mode</span>
+    </button>
+    <p class="side-note">Developed as a Web Development Course Project — Data saved locally in browser</p>
+  </div>
+</aside>
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+<!-- ============ MAIN ============ -->
+<main class="main">
+
+  <header class="topbar">
+    <button class="icon-btn only-mobile" id="openSidebar" aria-label="Open menu"><i class="fa-solid fa-bars"></i></button>
+    <div class="topbar-title">
+      <h1 id="pageTitle">Dashboard</h1>
+      <p id="pageSubtitle">Here's where your money went this month.</p>
+    </div>
+    <div class="topbar-actions">
+      <div class="search-wrap">
+        <i class="fa-solid fa-magnifying-glass"></i>
+        <input type="text" id="globalSearch" placeholder="Search transactions... (Ctrl+F)">
+      </div>
+      <button class="btn btn-primary" id="addTxnBtn"><i class="fa-solid fa-plus"></i> Add Transaction</button>
+    </div>
+  </header>
+
+  <!-- ============ DASHBOARD VIEW ============ -->
+  <section class="view active" id="view-dashboard">
+
+    <div class="stat-grid">
+      <div class="stat-card grad-blue">
+        <div class="stat-icon"><i class="fa-solid fa-scale-balanced"></i></div>
+        <div class="stat-info">
+          <span class="stat-label">Current Balance</span>
+          <span class="stat-value" id="statBalance" data-count="0">₹0</span>
+        </div>
+      </div>
+      <div class="stat-card grad-green">
+        <div class="stat-icon"><i class="fa-solid fa-arrow-trend-up"></i></div>
+        <div class="stat-info">
+          <span class="stat-label">Total Income</span>
+          <span class="stat-value" id="statIncome" data-count="0">₹0</span>
+        </div>
+      </div>
+      <div class="stat-card grad-red">
+        <div class="stat-icon"><i class="fa-solid fa-arrow-trend-down"></i></div>
+        <div class="stat-info">
+          <span class="stat-label">Total Expenses</span>
+          <span class="stat-value" id="statExpense" data-count="0">₹0</span>
+        </div>
+      </div>
+      <div class="stat-card grad-purple">
+        <div class="stat-icon"><i class="fa-solid fa-piggy-bank"></i></div>
+        <div class="stat-info">
+          <span class="stat-label">Monthly Savings</span>
+          <span class="stat-value" id="statSavings" data-count="0">₹0</span>
+        </div>
+      </div>
+      <div class="stat-card grad-orange">
+        <div class="stat-icon"><i class="fa-solid fa-receipt"></i></div>
+        <div class="stat-info">
+          <span class="stat-label">Transactions</span>
+          <span class="stat-value" id="statCount" data-count="0">0</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="dash-grid">
+      <div class="card mini-stats">
+        <h3>Quick Numbers</h3>
+        <ul class="mini-list" id="miniStatsList">
+          <!-- filled by JS: highest expense, highest income, averages, top category etc -->
+        </ul>
+      </div>
+
+      <div class="card recent-card">
+        <div class="card-head">
+          <h3>Recent Activity</h3>
+          <a href="#transactions" class="link-view-all" data-view="transactions">View all <i class="fa-solid fa-arrow-right"></i></a>
+        </div>
+        <div id="recentTxnList" class="recent-list"><!-- last 10 --></div>
+      </div>
+
+      <div class="card recurring-card">
+        <div class="card-head">
+          <h3>Recurring</h3>
+          <button class="link-btn" id="addRecurringBtn"><i class="fa-solid fa-plus"></i> New</button>
+        </div>
+        <div id="recurringList" class="recurring-list"></div>
+      </div>
+
+      <div class="card chart-card span-2">
+        <div class="card-head">
+          <h3>Income vs Expense (last 6 months)</h3>
+        </div>
+        <canvas id="dashBarChart"></canvas>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ TRANSACTIONS VIEW ============ -->
+  <section class="view" id="view-transactions">
+    <div class="card">
+      <div class="toolbar">
+        <div class="toolbar-group">
+          <select id="filterType" class="select-input">
+            <option value="all">All types</option>
+            <option value="income">Income</option>
+            <option value="expense">Expense</option>
+          </select>
+          <select id="filterCategory" class="select-input">
+            <option value="all">All categories</option>
+          </select>
+          <select id="filterPayment" class="select-input">
+            <option value="all">All payment methods</option>
+            <option value="Cash">Cash</option>
+            <option value="Card">Card</option>
+            <option value="UPI">UPI</option>
+            <option value="Bank Transfer">Bank Transfer</option>
+            <option value="Wallet">Wallet</option>
+          </select>
+          <input type="date" id="filterFrom" class="select-input" title="From date">
+          <input type="date" id="filterTo" class="select-input" title="To date">
+        </div>
+        <div class="toolbar-group">
+          <select id="sortBy" class="select-input">
+            <option value="newest">Newest first</option>
+            <option value="oldest">Oldest first</option>
+            <option value="highest">Highest amount</option>
+            <option value="lowest">Lowest amount</option>
+            <option value="az">Alphabetical (A-Z)</option>
+          </select>
+          <button class="btn btn-ghost" id="resetFiltersBtn"><i class="fa-solid fa-rotate-left"></i> Reset</button>
+        </div>
+      </div>
+
+      <div class="table-wrap">
+        <table class="txn-table">
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Category</th>
+              <th>Date</th>
+              <th>Payment</th>
+              <th>Amount</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="txnTableBody">
+            <!-- rows go here -->
+          </tbody>
+        </table>
+        <div class="empty-state" id="txnEmptyState" style="display:none;">
+          <i class="fa-solid fa-receipt"></i>
+          <p>No transactions found. Try changing your filters, or add a new one.</p>
+        </div>
+      </div>
+
+      <div class="pagination" id="pagination"></div>
+    </div>
+  </section>
+
+  <!-- ============ STATISTICS VIEW ============ -->
+  <section class="view" id="view-stats">
+    <div class="chart-grid">
+      <div class="card chart-card">
+        <h3><i class="fa-solid fa-chart-line"></i> Monthly Expenses</h3>
+        <canvas id="lineChart"></canvas>
+      </div>
+      <div class="card chart-card">
+        <h3><i class="fa-solid fa-chart-pie"></i> Expense by Category</h3>
+        <canvas id="pieChart"></canvas>
+      </div>
+      <div class="card chart-card">
+        <h3><i class="fa-solid fa-chart-column"></i> Income vs Expense</h3>
+        <canvas id="barChart"></canvas>
+      </div>
+      <div class="card chart-card">
+        <h3><i class="fa-solid fa-chart-area"></i> Savings Trend</h3>
+        <canvas id="areaChart"></canvas>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ BUDGET VIEW ============ -->
+  <section class="view" id="view-budget">
+    <div class="card budget-card">
+      <h3>Monthly Budget</h3>
+      <p class="muted">Set a limit for the current month and I'll keep an eye on it for you.</p>
+      <div class="budget-form">
+        <span class="rupee">₹</span>
+        <input type="number" id="budgetInput" placeholder="e.g. 20000" min="0">
+        <button class="btn btn-primary" id="saveBudgetBtn">Save Budget</button>
+      </div>
+
+      <div class="budget-progress-wrap" id="budgetProgressWrap" style="display:none;">
+        <div class="budget-bar-track">
+          <div class="budget-bar-fill" id="budgetBarFill"></div>
+        </div>
+        <div class="budget-numbers">
+          <div><span id="budgetUsedPct">0%</span><small>used</small></div>
+          <div><span id="budgetSpent">₹0</span><small>spent</small></div>
+          <div><span id="budgetRemaining">₹0</span><small>remaining</small></div>
+        </div>
+        <p class="budget-alert" id="budgetAlert" style="display:none;">
+          <i class="fa-solid fa-triangle-exclamation"></i> You've gone over budget this month.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ GOALS VIEW ============ -->
+  <section class="view" id="view-goals">
+    <div class="card">
+      <div class="card-head">
+        <h3>Financial Goals</h3>
+        <button class="btn btn-primary" id="addGoalBtn"><i class="fa-solid fa-plus"></i> New Goal</button>
+      </div>
+      <div class="goals-grid" id="goalsGrid">
+        <!-- goal cards go here -->
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ CALENDAR VIEW ============ -->
+  <section class="view" id="view-calendar">
+    <div class="card">
+      <div class="cal-head">
+        <button class="icon-btn" id="calPrev"><i class="fa-solid fa-chevron-left"></i></button>
+        <h3 id="calTitle">Month Year</h3>
+        <button class="icon-btn" id="calNext"><i class="fa-solid fa-chevron-right"></i></button>
+      </div>
+      <div class="cal-grid cal-weekdays">
+        <span>Sun</span><span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span>
+      </div>
+      <div class="cal-grid" id="calDays"></div>
+    </div>
+    <div class="card" id="calDayDetail" style="display:none;">
+      <h3 id="calDayTitle">Transactions</h3>
+      <div id="calDayList" class="recent-list"></div>
+    </div>
+  </section>
+
+  <!-- ============ REPORTS VIEW ============ -->
+  <section class="view" id="view-reports">
+    <div class="card">
+      <h3>Generate a Report</h3>
+      <p class="muted">Pick a report type, then export or print it.</p>
+      <div class="report-controls">
+        <select id="reportType" class="select-input">
+          <option value="monthly">Monthly Report</option>
+          <option value="yearly">Yearly Report</option>
+          <option value="category">Category Report</option>
+          <option value="summary">Summary Report</option>
+        </select>
+        <button class="btn btn-secondary" id="exportCsvBtn"><i class="fa-solid fa-file-csv"></i> Export CSV</button>
+        <button class="btn btn-secondary" id="exportJsonBtn"><i class="fa-solid fa-file-code"></i> Export JSON</button>
+        <label class="btn btn-secondary" for="importJsonFile"><i class="fa-solid fa-file-import"></i> Import JSON</label>
+        <input type="file" id="importJsonFile" accept=".json" style="display:none;">
+        <button class="btn btn-secondary" id="printReportBtn"><i class="fa-solid fa-print"></i> Print</button>
+      </div>
+      <div id="reportOutput" class="report-output"></div>
+    </div>
+  </section>
+
+</main>
+
+<!-- ============ ADD/EDIT TRANSACTION MODAL ============ -->
+<div class="modal-overlay" id="txnModalOverlay">
+  <div class="modal">
+    <div class="modal-head">
+      <h3 id="txnModalTitle">Add Transaction</h3>
+      <button class="icon-btn" id="closeTxnModal"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <form id="txnForm">
+      <input type="hidden" id="txnId">
+
+      <div class="type-switch">
+        <button type="button" class="type-btn active" data-type="expense" id="typeExpenseBtn">
+          <i class="fa-solid fa-arrow-down"></i> Expense
+        </button>
+        <button type="button" class="type-btn" data-type="income" id="typeIncomeBtn">
+          <i class="fa-solid fa-arrow-up"></i> Income
+        </button>
+      </div>
+
+      <div class="form-row">
+        <label for="txnName">Transaction Name</label>
+        <input type="text" id="txnName" placeholder="e.g. Groceries at DMart" autocomplete="off">
+        <span class="field-error" id="err-txnName"></span>
+      </div>
+
+      <div class="form-row two-col">
+        <div>
+          <label for="txnAmount">Amount</label>
+          <input type="number" id="txnAmount" placeholder="0.00" min="0" step="0.01">
+          <span class="field-error" id="err-txnAmount"></span>
+        </div>
+        <div>
+          <label for="txnDate">Date</label>
+          <input type="date" id="txnDate">
+          <span class="field-error" id="err-txnDate"></span>
+        </div>
+      </div>
+
+      <div class="form-row two-col">
+        <div>
+          <label for="txnCategory">Category</label>
+          <select id="txnCategory"></select>
+        </div>
+        <div>
+          <label for="txnPayment">Payment Method</label>
+          <select id="txnPayment">
+            <option>Cash</option>
+            <option>Card</option>
+            <option>UPI</option>
+            <option>Bank Transfer</option>
+            <option>Wallet</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <label for="txnNotes">Notes <small>(optional)</small></label>
+        <textarea id="txnNotes" rows="2" placeholder="anything worth remembering about this one..."></textarea>
+      </div>
+
+      <label class="checkbox-row">
+        <input type="checkbox" id="txnRecurring"> Make this a recurring transaction
+      </label>
+
+      <div class="modal-actions">
+        <button type="button" class="btn btn-ghost" id="cancelTxnBtn">Cancel</button>
+        <button type="submit" class="btn btn-primary" id="saveTxnBtn">Save Transaction</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- ============ GOAL MODAL ============ -->
+<div class="modal-overlay" id="goalModalOverlay">
+  <div class="modal small">
+    <div class="modal-head">
+      <h3>New Goal</h3>
+      <button class="icon-btn" id="closeGoalModal"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <form id="goalForm">
+      <div class="form-row">
+        <label for="goalName">Goal Name</label>
+        <input type="text" id="goalName" placeholder="e.g. New Laptop">
+      </div>
+      <div class="form-row two-col">
+        <div>
+          <label for="goalTarget">Target Amount</label>
+          <input type="number" id="goalTarget" min="1">
+        </div>
+        <div>
+          <label for="goalSaved">Already Saved</label>
+          <input type="number" id="goalSaved" min="0" value="0">
+        </div>
+      </div>
+      <div class="form-row">
+        <label for="goalIcon">Icon</label>
+        <select id="goalIcon">
+          <option value="fa-laptop">💻 Laptop</option>
+          <option value="fa-plane">✈️ Trip</option>
+          <option value="fa-house">🏠 House</option>
+          <option value="fa-car">🚗 Car</option>
+          <option value="fa-shield-halved">🛡️ Emergency Fund</option>
+          <option value="fa-ring">💍 Wedding</option>
+          <option value="fa-graduation-cap">🎓 Education</option>
+          <option value="fa-star">⭐ Other</option>
+        </select>
+      </div>
+      <div class="modal-actions">
+        <button type="button" class="btn btn-ghost" id="cancelGoalBtn">Cancel</button>
+        <button type="submit" class="btn btn-primary">Create Goal</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- ============ CONFIRM DELETE MODAL ============ -->
+<div class="modal-overlay" id="confirmModalOverlay">
+  <div class="modal small">
+    <div class="modal-head">
+      <h3>Are you sure?</h3>
+    </div>
+    <p id="confirmMsg" class="confirm-msg">This will permanently delete the item. This can't be undone.</p>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" id="confirmCancelBtn">Cancel</button>
+      <button class="btn btn-danger" id="confirmOkBtn">Yes, delete it</button>
+    </div>
+  </div>
+</div>
+
+<script src="assets/js/utils.js"></script>
+<script src="assets/js/storage.js"></script>
+<script src="assets/js/charts.js"></script>
+<script src="assets/js/app.js"></script>
+</body>
+</html>
