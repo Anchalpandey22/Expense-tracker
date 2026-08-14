@@ -10,12 +10,29 @@ I originally built this for a web dev course project, then kept adding to it bec
 
 ## Screenshots
 
-> _(drop your own screenshots in the `screenshots/` folder — `dashboard.png`, `transactions.png`, `stats.png`, `dark-mode.png` are the ones referenced below once you add them)_
+**Dashboard**
 
-| Dashboard | Statistics | Dark Mode | Report | Transactions | Budget |
-|---|---|---|
-| `screenshots/dashboard.png` | `screenshots/stats.png` | `screenshots/dark-mode.png` |
-| `screenshots/report.png` | `screenshots/transactions.png` | `screenshots/budget.png`|
+![Dashboard](screenshots/dashboard.png)
+
+**Statistic** 
+
+![Statistic](screenshots/stats.png) 
+
+**DarkMode**
+
+![DarkMode](screenshots/darkmode.png)
+
+**Report**
+
+![Report](screenshots/report.png) 
+
+**Transaction**
+
+![Transaction](screenshots/transaction.png)
+
+**Budget**
+
+![Budget](screenshots/budget.png)
 
 
 
