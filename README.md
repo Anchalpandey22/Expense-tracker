@@ -193,6 +193,4 @@ This started as a solo project but if you want to poke at it:
 
 Nothing formal — just try to keep the existing code style (comments explaining the "why," not just the "what") and test in both light and dark mode before submitting.
 
-## License
 
-MIT — do whatever you want with it, just don't sell it to my professor as your own project 😄
