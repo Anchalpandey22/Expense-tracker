@@ -3,7 +3,7 @@
 A personal expense tracker I built to actually keep tabs on my own spending (broke-college-student energy). No backend, no sign-up — everything lives in your browser's local storage, so it's private and works offline once the page has loaded once.
 
 I originally built this for a web dev course project, then kept adding to it because it turned out kind of useful. It's not perfect and there are a couple of "good enough for now" decisions in the code, but it's fully functional and I use it myself.
-
+ 
 > **Live demo:** just open `index.html`, no build step needed.
 
 ---
