@@ -6,7 +6,7 @@ I originally built this for a web dev course project, then kept adding to it bec
  
 > **Live demo:** just open `index.html`, no build step needed.
 
----
+--- 
 
 ## Screenshots
 
